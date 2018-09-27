@@ -42,7 +42,6 @@
             this.sY = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.side = new System.Windows.Forms.TextBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.canvas)).BeginInit();
             this.SuspendLayout();
             // 
@@ -108,6 +107,7 @@
             this.A.TabIndex = 5;
             this.A.Text = "1";
             this.A.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.A.TextChanged += new System.EventHandler(this.A_TextChanged);
             // 
             // B
             // 
@@ -189,19 +189,11 @@
             this.side.Text = "50";
             this.side.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(260, 3);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(100, 20);
-            this.textBox1.TabIndex = 14;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(500, 500);
-            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.side);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.sY);
@@ -241,7 +233,6 @@
         private System.Windows.Forms.TextBox sY;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox side;
-        private System.Windows.Forms.TextBox textBox1;
     }
 }
 

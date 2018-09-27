@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using Shapes;
@@ -18,9 +13,9 @@ namespace Lab01
         int alpha = 0;
         float sXc, sYc;
         float sideS;
-        double kPerp;
-        double xStep = 1;
-        double kx, ky;
+        double xStep = 0.5;
+        double kx, ky, kPerp;
+        int moveKx = 1, moveKy = 1;
         Shapes.Rectangle rect;
         Line line, perp;
         System.Threading.Timer t;
@@ -28,17 +23,9 @@ namespace Lab01
         public Form1()
         {
             InitializeComponent();
-            
+
             bmp = new Bitmap(this.canvas.Width, this.canvas.Height);
             graphics = Graphics.FromImage(bmp);
-
-            double a = double.Parse(this.A.Text);
-            double b = double.Parse(this.B.Text);
-            double c = double.Parse(this.C.Text);
-            kPerp = b / a;
-            line = new Line((x) => (-(a / b) * x - c / b));
-            perp = new Line((x) => kPerp * (x - float.Parse(this.sX.Text)) + float.Parse(this.sY.Text));
-
 
         }
 
@@ -47,21 +34,52 @@ namespace Lab01
             try
             {
                 t?.Dispose();
-                sXc = float.Parse(this.sX.Text);
-                sYc = float.Parse(this.sY.Text);
-                sideS = float.Parse(this.side.Text);
-                rect = new Shapes.Rectangle(sXc, sYc, sideS);
 
                 double a = double.Parse(this.A.Text);
                 double b = double.Parse(this.B.Text);
                 double c = double.Parse(this.C.Text);
-                line = new Line((x) => ((-a / b) * x - c / b));
-                perp = new Line((x) => (Math.Tan(Math.Atan((-a/b))-Math.PI/2) * x + GetC(a, -b, double.Parse(this.sX.Text), double.Parse(this.sY.Text))));
+
+                sXc = float.Parse(this.sX.Text);
+                sYc = float.Parse(this.sY.Text);
+                sideS = float.Parse(this.side.Text);
+
+                rect = new Shapes.Rectangle(new Shapes.Point(sXc - sideS, sYc - sideS), new Shapes.Point(sXc + sideS, sYc - sideS), new Shapes.Point(sXc + sideS, sYc + sideS), new Shapes.Point(sXc - sideS, sYc + sideS));
+                rect.Center = new Shapes.Point(sXc, sYc);
+                line = new Line((x) => (-(a / b) * x - c / b));
+
+                kPerp = b / a;
+                perp = new Line((x) => (b / a) * (x - sXc) + sYc);
+
 
                 graphics.Clear(Color.White);
-                DrawLine();
-                DrawSquare();
+
                 CrossPoint();
+
+                if (kx <= sXc && ky <= sYc)
+                {
+                    moveKx = -1;
+                    moveKy = -1;
+                }
+                else if (kx <= sXc && ky >= sYc)
+                {
+                    moveKx = -1;
+                    moveKy = 1;
+                }
+                else if (kx >= sXc && ky <= sYc)
+                {
+                    moveKx = 1;
+                    moveKy = -1;
+                }
+                else if (kx >= sXc && ky >= sYc)
+                {
+                    moveKx = 1;
+                    moveKy = 1;
+                }
+                else
+                {
+                    throw new ArgumentException("Incorrect data!");
+                }
+
                 t = new System.Threading.Timer(new TimerCallback((object o) => { this.graphics.Clear(Color.White); DrawLine(); DrawSquare(); this.canvas.Image = bmp; }), 0, 1000, 1);
             }
             catch (Exception exc)
@@ -71,14 +89,18 @@ namespace Lab01
             }
         }
 
+        private void A_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
         private void DrawLine()
         {
             using (Pen pen = new Pen(Color.Red))
             {
                 line.Draw(graphics, pen);
                 pen.Color = Color.Green;
-                //perp.Draw(graphics, pen);
-                graphics.DrawLine(pen, (float)sXc, (float)sYc, (float)kx, (float)ky);
+                perp.Draw(graphics, pen);
             }
         }
 
@@ -92,14 +114,13 @@ namespace Lab01
             using (Pen pen = new Pen(Color.Black))
             {
                 rect.Rotate(1);
-                rect.Move((float)(-xStep), (float)(-xStep/kPerp));
+                rect.Move((float)(moveKx * xStep), (float)(moveKy * Math.Abs(kPerp) * xStep));
                 if (line.Contains(rect.P1) || line.Contains(rect.P2) || line.Contains(rect.P3) || line.Contains(rect.P4))
                 {
                     t?.Dispose();
                 }
                 alpha = (alpha + 1) % 360;
-                textBox1.Text = alpha.ToString();
-                rect.Draw(graphics, pen);
+                rect?.Draw(graphics, pen);
             }
         }
 
@@ -112,14 +133,15 @@ namespace Lab01
                 {
                     kx = t;
                     ky = line.InvokeFunc(t);
-                    MessageBox.Show($"{kx} ; {ky}");
+                    MessageBox.Show("Cross: " + kx + " " + ky);
+                    return;
                 }
 
                 t += xStep;
             }
         }
 
-        private void Update()
+        private new void Update()
         {
             this.graphics.Clear(Color.White);
             this.canvas.Image = bmp;
